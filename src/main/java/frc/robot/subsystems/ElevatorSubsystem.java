@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -45,19 +46,20 @@ public class ElevatorSubsystem extends SubsystemBase {
     m_elevatorMotor.setControl(m_VoltageOut.withOutput(0));
   }
 
-  public void changePIDMode(boolean newPID){
-    PIDMode = newPID;
+  public void setTarget(double target){
+    targetPose = target;
+    PIDMode = true;
   }
-  }
-
-
-
+  
   @Override
   public void periodic() {
-
     if (PIDMode) {
-      return 
+      ff = -20;
+      double fb = pidController.calculate(getHeight(), targetPose);
+      m_elevatorMotor.setControl(m_VoltageOut.withOutput(ff-fb));
     }
-    // This method will be called once per scheduler run
+  }
+  public Command goToPose(double target){
+    return runOnce(() -> setTarget(target));
   }
 }
